@@ -5,18 +5,19 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	downright "github.com/nanmu42/Go-HTTP-Server-Gracefully-Shutdown-Done-Right"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	downright "github.com/nanmu42/Go-HTTP-Server-Gracefully-Shutdown-Done-Right"
 )
 
 var (
-	port = flag.Int("port", 3100, "port to listen on")
-	sleepSeconds = flag.Int("sleep", 6, "seconds to sleep before response")
+	port           = flag.Int("port", 3100, "port to listen on")
+	sleepSeconds   = flag.Int("sleep", 6, "seconds to sleep before response")
 	timeoutSeconds = flag.Int("timeout", 10, "seconds to wait before shutting down")
 )
 
@@ -41,8 +42,8 @@ func main() {
 
 	server := &GracefulServer{
 		Server: &http.Server{
-			Addr:              fmt.Sprintf(":%d", *port),
-			Handler:           downright.SlowHandler(*sleepSeconds),
+			Addr:    fmt.Sprintf(":%d", *port),
+			Handler: downright.SlowHandler(*sleepSeconds),
 		},
 	}
 
@@ -57,7 +58,7 @@ func main() {
 }
 
 type GracefulServer struct {
-	Server *http.Server
+	Server           *http.Server
 	shutdownFinished chan struct{}
 }
 
@@ -76,7 +77,7 @@ func (s *GracefulServer) ListenAndServe() (err error) {
 	}
 
 	log.Println("waiting for shutdown finishing...")
-	<- s.shutdownFinished
+	<-s.shutdownFinished
 	log.Println("shutdown finished")
 
 	return
@@ -87,7 +88,7 @@ func (s *GracefulServer) WaitForExitingSignal(timeout time.Duration) {
 	signal.Notify(waiter, syscall.SIGTERM, syscall.SIGINT)
 
 	// blocks here until there's a signal
-	<- waiter
+	<-waiter
 
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
