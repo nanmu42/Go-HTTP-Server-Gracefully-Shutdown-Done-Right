@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"syscall"
 	"time"
 )
 
@@ -83,7 +84,7 @@ func (s *GracefulServer) ListenAndServe() (err error) {
 
 func (s *GracefulServer) WaitForExitingSignal(timeout time.Duration) {
 	var waiter = make(chan os.Signal, 1) // buffered channel
-	signal.Notify(waiter, os.Interrupt)
+	signal.Notify(waiter, syscall.SIGTERM, syscall.SIGINT)
 
 	// blocks here until there's a signal
 	<- waiter
